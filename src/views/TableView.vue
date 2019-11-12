@@ -12,8 +12,10 @@
       <v-switch v-model="actionDrawer" label="actionDrawer"></v-switch>
     </v-row>
     <table-new
-      row-key="name"
+      colID="name"
       live-search
+      allow-edit
+      allow-delete
       :cols="headers"
       :rows="data"
       :dense="dense"
@@ -22,11 +24,12 @@
       :allow-add="allowAdd"
       :allow-search="allowSearch"
       :allow-refresh="allowRefresh"
-      :show-select="showSelect"
+      :check-box-column="showSelect"
       :single-select="singleSelect"
       :action-drawer="actionDrawer"
-      :total-rows="totalDesserts"
+      :total-items="totalDesserts"
       selectable
+      responsive-columns
       @load-data="loadData"
       @selection-change="test"
     >
@@ -68,6 +71,14 @@ export default {
           value: "name"
         },
         { text: "Calories", value: "calories" },
+        { text: "Fat (g)", value: "fat" },
+        { text: "Carbs (g)", value: "carbs" },
+        { text: "Protein (g)", value: "protein" },
+        { text: "Iron (%)", value: "iron" },
+        { text: "Fat (g)", value: "fat" },
+        { text: "Carbs (g)", value: "carbs" },
+        { text: "Protein (g)", value: "protein" },
+        { text: "Iron (%)", value: "iron" },
         { text: "Fat (g)", value: "fat" },
         { text: "Carbs (g)", value: "carbs" },
         { text: "Protein (g)", value: "protein" },

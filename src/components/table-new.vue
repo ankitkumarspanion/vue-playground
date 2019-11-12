@@ -1,10 +1,14 @@
 <template>
-  <v-content v-scroll="scrolledVertical">
+  <v-content v-scroll="scrolledVertical" v-resize="cropColumns">
     <v-container class="gid-table pa-0" :class="getGidTableCLasses()">
       <!-- above the table -->
-      {{selected_internal}}
       <v-card flat tile>
         <v-toolbar flat :dense="dense" v-if="canShowToolbar">
+          <router-link :to="routeBack" v-if="routeBack">
+            <v-btn icon class="ma-0" color="grey--text">
+              <v-icon>arrow_back</v-icon>
+            </v-btn>
+          </router-link>
           <v-toolbar-title class="ml-0" :class="dense ? 'dense-toolbar-title':''">
             <template v-if="$slots.description">
               <slot name="description"></slot>
@@ -91,16 +95,15 @@
           :style="getselfScrollStyle()"
         >
           <v-data-table
-            :item-key="rowKey"
+            :item-key="colID"
             :id="tableRef"
             :ref="tableRef"
             :dense="dense"
-            :caption="caption"
             :loading="loading"
             :headers="tableCols"
             :disable-sort="false"
             :hide-default-header="true"
-            :show-select="showSelect"
+            :show-select="checkBoxColumn"
             :single-select="singleSelect"
             :show-expand="canShowExpand"
             :single-expand="canShowExpand"
@@ -110,12 +113,12 @@
             :items-per-page.sync="pagination.rowsPerPage"
             :items="loading && !infiniteScroll?[]:tableRows"
             :hide-default-footer="infiniteScroll?true:false"
-            :server-items-length="computedTotalRows"
+            :server-items-length="computedtotalItems"
             :style="getselfScrollStyle()"
           >
             <!-- header of the table -->
             <template #header="{ props }">
-              <thead v-if="!(hideHeader && (loading && infiniteScroll) && !tableRows.length)">
+              <thead v-if="!(hideHeaders && (loading && infiniteScroll) && !tableRows.length)">
                 <tr>
                   <template v-for="(header, index) in props.headers">
                     <th
@@ -153,7 +156,7 @@
               </thead>
             </template>
             <!-- rows of the table -->
-            <template #item="{ item, headers }">
+            <template #item="{ item, headers, isExpanded }">
               <tr
                 @click.stop="onRow(item)"
                 :class="[getRowClasses(item)]"
@@ -165,7 +168,17 @@
                     :style="getColumnStyles(col, item)"
                     :key="i"
                   >
-                    <template v-if="col.value == 'data-table-select'">
+                    <template v-if="col.value=='ExpandColumn'">
+                      <v-btn
+                        icon
+                        small
+                        class="ma-0"
+                        @click.stop="!isExpanded ? openDrawer('icon', item):closeDrawer(item)"
+                      >
+                        <v-icon color="rgba(0,0,0,0.34)">{{isExpanded ? 'remove':'add'}}</v-icon>
+                      </v-btn>
+                    </template>
+                    <template v-else-if="col.value == 'data-table-select'">
                       <v-checkbox
                         hide-details
                         color="primary"
@@ -280,7 +293,7 @@
             <!-- expanded item of the table -->
             <template #expanded-item="{ item,  headers }" v-if="!actionDrawer">
               <td :colspan="headers.length" class="pa-0">
-                <div>
+                <div v-if="!item.expanded">
                   <v-card-title class="px-4 subtitle-1">{{computedActionDialogTitle}}</v-card-title>
                   <v-card-text class="px-4">
                     <template v-if="actions">
@@ -319,6 +332,7 @@
                   </v-card-actions>
                   <v-divider class="ma-0 pa-0"></v-divider>
                 </div>
+                <div v-else>{{tableCols__internal}}</div>
               </td>
             </template>
             <!-- footer below the table -->
@@ -341,7 +355,7 @@
                 <slot name="footer"></slot>
               </div>
             </template>
-            <!-- when there is no data -->
+            <!-- when table has no data -->
             <template #no-data>
               <template v-if="!loading">
                 gid-empty-state-nodata
@@ -380,7 +394,7 @@
                 <div class="gid-table-placeholder"></div>
               </template>
             </template>
-            <!-- default loading slots -->
+            <!-- default overidden loading slots -->
             <template #loading>
               <div class="gid-table-placeholder"></div>
             </template>
@@ -472,14 +486,12 @@ export default {
   props: {
     addEntityRoute: Object,
     cols: { type: Array, required: true },
-    rowKey: { type: String, default: "id" },
+    colID: { type: String, default: "id" },
     elevated: { type: Boolean, default: true },
     rows: Array,
     rounded: Boolean,
-    caption: String,
     tableName: String,
     entityType: String,
-    allowExternalAdd: Boolean,
     allowAdd: [Boolean, String],
     allowEdit: [Boolean, String],
     allowDelete: [Boolean, String],
@@ -490,8 +502,8 @@ export default {
     noDataText: { type: String, default: "No data available" },
     hasNext: Boolean,
     maxRows: { type: Number, default: 1000 },
-    totalRows: { type: Number, default: 0 },
-    infiniteScroll: [Boolean, String],
+    totalItems: { type: Number, default: 0 },
+    infiniteScroll: [Boolean, String, Number],
     actionDisabled: [Boolean],
     addNewLabel: String,
     addNewIcon: String,
@@ -504,17 +516,18 @@ export default {
     customActionLabel: { type: String, default: "Action" },
     customDialogTitle: String,
     selectable: [Boolean, String],
-    hideHeader: Boolean,
+    hideHeaders: Boolean,
     liveSearch: Boolean,
     loading: Boolean,
     dense: Boolean,
-    showSelect: Boolean,
-    singleSelect: [Boolean],
+    checkBoxColumn: Boolean,
+    singleSelect: Boolean,
+    routeBack: null,
     querySearch: { type: Boolean, default: true },
     queryParam: { type: String, default: "search" },
     initialSort: Object,
-
-    actionDrawer: [Boolean, String]
+    actionDrawer: [Boolean, String],
+    responsiveColumns: Boolean
   },
   data() {
     return {
@@ -542,7 +555,8 @@ export default {
       tableRows: [],
       tableCols: [],
       updateModel: null,
-      selected_internal: []
+      selected__internal: [],
+      tableCols__internal: []
     };
   },
   watch: {
@@ -580,7 +594,7 @@ export default {
               ...newV,
               rowsPerPage:
                 newV.rowsPerPage && newV.rowsPerPage < 1
-                  ? this.totalRows
+                  ? this.totalItems
                   : newV.rowsPerPage,
               searchTxt: this.searchText
             }
@@ -591,7 +605,10 @@ export default {
     },
     cols: {
       handler(n) {
-        let _cols = [...n];
+        let _cols = [
+          { text: "", value: "ExpandColumn", sortable: false, align: "right" },
+          ...n
+        ];
         if (this.allowEdit || this.allowDelete || this.actions) {
           _cols.push({
             text: "Actions",
@@ -600,7 +617,8 @@ export default {
             value: "data-table-expand"
           });
         }
-        let notCheckBox = this.showSelect && !this.singleSelect ? false : true;
+        let notCheckBox =
+          this.checkBoxColumn && !this.singleSelect ? false : true;
         if (
           notCheckBox &&
           this.selectable &&
@@ -624,7 +642,7 @@ export default {
           if (!this.fetchingData) return;
           if (this.usingHasNext) {
             if (!this.hasNext) return;
-          } else if (this.tableRows.length >= this.totalRows) return;
+          } else if (this.tableRows.length >= this.totalItems) return;
           this.tableRows.push(...n.filter(e => !this.tableRows.includes(e)));
         } else {
           this.tableRows = [...n];
@@ -632,7 +650,7 @@ export default {
         let _rows = this.tableRows.map(e => {
           let selected = e._selected
             ? true
-            : this.selected_internal.find(el => el === e[this.rowKey])
+            : this.selected__internal.find(el => el === e[this.colID])
             ? true
             : false;
           delete e._selected;
@@ -680,11 +698,11 @@ export default {
         ? true
         : false;
     },
-    computedTotalRows() {
+    computedtotalItems() {
       return this.$listeners["load-data"]
         ? this.usingHasNext
           ? this.tableRows.length + 1
-          : this.totalRows
+          : this.totalItems
         : undefined;
     },
     computedAddNewLabel() {
@@ -732,11 +750,80 @@ export default {
       }
     },
     //gid-table methods
+    cropColumns() {
+      if (!this.responsiveColumns || this.hideHeaders) return;
+      this.$nextTick(() => {
+        setTimeout(() => {
+          let tableContainer = this.$refs[this.tableRef].$el.querySelector(
+            ".v-data-table__wrapper"
+          );
+          let maxWidth = tableContainer.getBoundingClientRect().right;
+          let table = this.$refs[this.tableRef].$el.querySelector("table");
+          let tableWidth = table.getBoundingClientRect().right;
+          let ths = this.$refs[this.tableRef].$el
+            .querySelector("thead tr")
+            .querySelectorAll("th");
+          let tds = this.$refs[this.tableRef].$el
+            .querySelector("tbody tr.gid-table-row ")
+            .querySelectorAll("td");
+          if (tds.length == ths.length) {
+            if (tableWidth > maxWidth) {
+              let firstIdx = 1;
+              if (this.checkBoxColumn) firstIdx++;
+              if (this.responsiveColumns) firstIdx++;
+              for (let i = ths.length - 1; i >= firstIdx; i--) {
+                if (ths[i].getBoundingClientRect().right > maxWidth) {
+                  let colIdx = this.tableCols.length;
+                  if (
+                    this.tableCols[colIdx - 1].value === "data-table-selectable"
+                  )
+                    colIdx--;
+                  if (this.tableCols[colIdx - 1].value === "data-table-expand")
+                    colIdx--;
+
+                  if (colIdx > firstIdx) {
+                    this.tableCols[colIdx - 1].cropBreakPoint = maxWidth;
+                    this.tableCols[colIdx - 1].cropWidth = ths[
+                      i
+                    ].getBoundingClientRect().width;
+                    this.tableCols__internal.unshift(
+                      ...this.tableCols.splice(colIdx - 1, 1)
+                    );
+                  }
+                }
+              }
+            } else {
+              for (let i = 0; i < this.tableCols__internal.length; i++) {
+                if (
+                  this.tableCols__internal[i].hasOwnProperty(
+                    "cropBreakPoint"
+                  ) &&
+                  this.tableCols__internal[i].cropBreakPoint < maxWidth
+                ) {
+                  let colIdx = this.tableCols.length;
+                  if (
+                    this.tableCols[colIdx - 1].value === "data-table-selectable"
+                  )
+                    colIdx--;
+                  if (this.tableCols[colIdx - 1].value === "data-table-expand")
+                    colIdx--;
+                  this.tableCols.splice(
+                    colIdx,
+                    0,
+                    this.tableCols__internal.shift()
+                  );
+                }
+              }
+            }
+          }
+        }, 300);
+      });
+    },
     scrolledVertical(e) {
       if (!this.infiniteScroll || this.fetchingData) return;
       if (this.usingHasNext) {
         if (!this.hasNext) return;
-      } else if (this.tableRows.length >= this.totalRows) return;
+      } else if (this.tableRows.length >= this.totalItems) return;
       if (this.scrollSelf) {
         if (this.scrolling) return;
         this.scrolling = true;
@@ -796,8 +883,6 @@ export default {
         this.updateSearchText();
       }
     },
-
-    //functions
     getGidTableCLasses() {
       let classes = "";
       classes += this.elevated ? "elevation-1 " : "";
@@ -842,9 +927,10 @@ export default {
       if (
         item.isEdit ||
         item.isAction ||
+        item.expanded ||
         (this.selectable &&
           this.selectable !== "icon" &&
-          !this.showSelect &&
+          !this.checkBoxColumn &&
           item._selected == true)
       ) {
         styl += "box-shadow:inset -3px -1px 0 -1px #42aaee;";
@@ -877,6 +963,10 @@ export default {
     openDrawer(type, item) {
       this.closeDrawer();
       switch (type) {
+        case "icon":
+          this.expanded = true;
+          item.expanded = true;
+          break;
         case "add":
           this.isAdd = true;
           break;
@@ -909,11 +999,13 @@ export default {
       this.isEdit = false;
       this.isDelete = false;
       this.isAction = false;
+      this.expanded = false;
       this.isDrawerActive = false;
       if (this.updateModel) {
         delete this.updateModel.isAction;
         delete this.updateModel.isDelete;
         delete this.updateModel.isEdit;
+        delete this.updateModel.expanded;
         this.expand(this.updateModel, false);
       }
       this.emitEvent("drawer-open", false);
@@ -952,7 +1044,7 @@ export default {
       }
     },
     onRow(item) {
-      if (this.showSelect) return;
+      if (this.checkBoxColumn) return;
       if (this.selectable) {
         item._selected = true;
         this.toggleOneSelection(item);
@@ -970,20 +1062,20 @@ export default {
     },
     refresh(e) {
       this.tableRows = [];
-      this.closeDrawer();
+      this.selected__internal = [];
       if (this.searchTextModel.trim().length && e != null) {
         this.searchText = "";
         this.searchTextModel = "";
       }
       this.pagination.page = undefined;
       this.pagination.page = 1;
+      this.closeDrawer();
       this.updateQuerySearch(true, "");
     },
     toggleOneSelection(item) {
       this.tableRows.forEach(e => {
-        if (!e.hasOwnProperty(this.rowKey))
-          throw new Error("row-key not found");
-        if (e[this.rowKey] !== item[this.rowKey]) {
+        if (!e.hasOwnProperty(this.colID)) throw new Error("row-key not found");
+        if (e[this.colID] !== item[this.colID]) {
           e._selected = false;
         }
       });
@@ -1023,14 +1115,14 @@ export default {
       // }
     },
     handleInternalSelect(item) {
-      let i = this.selected_internal.indexOf(item[this.rowKey]);
+      let i = this.selected__internal.indexOf(item[this.colID]);
       if (i < 0) {
         if (item._selected) {
-          this.selected_internal.push(item[this.rowKey]);
+          this.selected__internal.push(item[this.colID]);
         }
       } else {
         if (!item._selected) {
-          this.selected_internal.splice(i, 1);
+          this.selected__internal.splice(i, 1);
         }
       }
     },
@@ -1067,6 +1159,9 @@ export default {
     }
     // this.updateQuerySearch();
     this.handleIntialSort();
+    setTimeout(() => {
+      this.cropColumns();
+    }, 500);
   }
 };
 </script>
