@@ -1,25 +1,27 @@
 <template>
     <div id="app">
         <v-app>
-            <TableView></TableView>
+            <ParsedIcons></ParsedIcons>
         </v-app>
     </div>
 </template>
 
 <script>
-import TableView from "./views/TableView.vue";
+// import TableView from './views/TableView.vue';
+// import DragDropView from './views/DragDropView.vue';
+import ParsedIcons from './views/ParsedIcons.vue';
 
 export default {
-    name: "app",
+    name: 'app',
     components: {
-        TableView
-    }
+        ParsedIcons,
+    },
 };
 </script>
 
 <style>
 #app {
-    font-family: "Avenir", Helvetica, Arial, sans-serif;
+    font-family: 'Avenir', Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-align: center;
