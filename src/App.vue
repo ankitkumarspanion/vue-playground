@@ -1,7 +1,7 @@
 <template>
     <div id="app">
         <v-app>
-            <ParsedIcons></ParsedIcons>
+            <D3Playground></D3Playground>
         </v-app>
     </div>
 </template>
@@ -9,12 +9,13 @@
 <script>
 // import TableView from './views/TableView.vue';
 // import DragDropView from './views/DragDropView.vue';
-import ParsedIcons from './views/ParsedIcons.vue';
+// import ParsedIcons from './views/ParsedIcons.vue';
+import D3Playground from './views/D3Playground.vue';
 
 export default {
     name: 'app',
     components: {
-        ParsedIcons,
+        D3Playground,
     },
 };
 </script>
