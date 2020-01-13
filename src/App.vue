@@ -1,7 +1,8 @@
 <template>
     <div id="app">
         <v-app>
-            <D3Playground></D3Playground>
+            <v-text-field v-model="text"></v-text-field>
+            <TextHighlight :query="text">Lorem ipsum dolor sit amet consectetur adipisicing elit. Numquam ipsa illo maxime, explicabo rerum impedit nisi. Dolor minima quasi, ullam, nulla animi, nihil laboriosam rem optio et voluptas quidem ipsum!</TextHighlight>
         </v-app>
     </div>
 </template>
@@ -10,12 +11,18 @@
 // import TableView from './views/TableView.vue';
 // import DragDropView from './views/DragDropView.vue';
 // import ParsedIcons from './views/ParsedIcons.vue';
-import D3Playground from './views/D3Playground.vue';
+// import D3Playground from './views/D3Playground.vue';
+import TextHighlight from './views/TextHighlight.vue';
 
 export default {
     name: 'app',
     components: {
-        D3Playground,
+        TextHighlight,
+    },
+    data() {
+        return {
+            text: '',
+        };
     },
 };
 </script>
