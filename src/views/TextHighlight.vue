@@ -36,31 +36,32 @@ export default {
             return indices;
         },
         getParsedText() {
-            const chunks = [];
+            const pieces = [];
+
             let text = this.$slots.default[0].text;
             let highlights = this.getIndicesOf();
+
             let lastIndex = 0;
-            highlights.forEach(({ startIndex, endIndex }, index) => {
+            highlights.forEach(({ startIndex, endIndex }) => {
                 if (lastIndex !== startIndex) {
-                    chunks.push({
+                    pieces.push({
                         highlighted: false,
                         text: text.slice(lastIndex, startIndex),
                     });
                 }
-                chunks.push({
+                pieces.push({
                     highlighted: true,
                     text: text.slice(startIndex, endIndex),
-                    highlightIndex: index,
                 });
                 lastIndex = endIndex;
             });
             if (lastIndex !== text.length) {
-                chunks.push({
+                pieces.push({
                     highlighted: false,
                     text: text.slice(lastIndex),
                 });
             }
-            return chunks;
+            return pieces;
         },
         getColorByBG() {
             // TODO
