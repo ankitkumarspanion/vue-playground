@@ -73,13 +73,9 @@ export default {
             parsedText.forEach(({ highlighted, text }) => {
                 html += !highlighted
                     ? text
-                    : `<mark 
-                            class="text--highlighted" 
-                            style="
-                                    background-color: ${this.color};
-                                    color: ${this.getColorByBG()};
-                                "
-                        >${text}</mark>`;
+                    : `<mark class="text--highlighted" style="background-color: ${
+                          this.color
+                      };color: ${this.getColorByBG()};">${text}</mark>`;
             });
             return html;
         },
