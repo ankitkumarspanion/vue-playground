@@ -1,8 +1,19 @@
 <template>
     <div id="app">
         <v-app>
-            <v-text-field v-model="text"></v-text-field>
-            <TextHighlight :query="text">Lorem ipsum dolor sit amet consectetur adipisicing elit. Numquam ipsa illo maxime, explicabo rerum impedit nisi. Dolor minima quasi, ullam, nulla animi, nihil laboriosam rem optio et voluptas quidem ipsum!</TextHighlight>
+            <v-card>
+                <v-toolbar raised>
+                    {{ search }}
+                    <v-spacer></v-spacer>
+                    <div style="padding: 0px 200px;">
+                        <gid-search
+                            :options="options"
+                            multiple
+                            @search="(a) => (search = a)"
+                        ></gid-search>
+                    </div>
+                </v-toolbar>
+            </v-card>
         </v-app>
     </div>
 </template>
@@ -12,16 +23,24 @@
 // import DragDropView from './views/DragDropView.vue';
 // import ParsedIcons from './views/ParsedIcons.vue';
 // import D3Playground from './views/D3Playground.vue';
-import TextHighlight from './views/TextHighlight.vue';
+import GidSearch from './views/GidSearch.vue';
 
 export default {
     name: 'app',
     components: {
-        TextHighlight,
+        GidSearch,
     },
     data() {
         return {
             text: '',
+            search: '',
+            options: [
+                { label: 'abc', key: 'abc' },
+                { label: 'efg', key: 'efg' },
+                { label: 'lmn', key: 'lmn' },
+                { label: 'pqr', key: 'pqr' },
+                { label: 'xyz', key: 'xyz' },
+            ],
         };
     },
 };
