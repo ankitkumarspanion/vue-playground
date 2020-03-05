@@ -1,19 +1,7 @@
 <template>
     <div id="app">
         <v-app>
-            <v-card>
-                <v-toolbar raised>
-                    {{ search }}
-                    <v-spacer></v-spacer>
-                    <div style="padding: 0px 200px;">
-                        <gid-search
-                            :options="options"
-                            multiple
-                            @search="(a) => (search = a)"
-                        ></gid-search>
-                    </div>
-                </v-toolbar>
-            </v-card>
+            <GidLineage></GidLineage>
         </v-app>
     </div>
 </template>
@@ -23,12 +11,13 @@
 // import DragDropView from './views/DragDropView.vue';
 // import ParsedIcons from './views/ParsedIcons.vue';
 // import D3Playground from './views/D3Playground.vue';
-import GidSearch from './views/GidSearch.vue';
+// import GidSearch from './views/GidSearch.vue';
+import GidLineage from './views/GidLineage.vue';
 
 export default {
     name: 'app',
     components: {
-        GidSearch,
+        GidLineage,
     },
     data() {
         return {
