@@ -74,9 +74,9 @@ export default {
     },
     methods: {
         renderArrows() {
-            // this.nodes.forEach((e) => {
-            this.renderArrow(this.nodes[5], 2);
-            // });
+            this.nodes.forEach((e) => {
+                this.renderArrow(e, 2);
+            });
         },
         renderArrow(node, size) {
             const nodeA = document.getElementById(node.from);
@@ -93,10 +93,18 @@ export default {
             };
 
             $(`.${node.id}`).remove();
+            $(`.svg-container`).remove();
 
             // only for strainght lines yet
             this.generateLines(node, _nodeCoords, size);
             this.generateDots(node, _nodeCoords, size);
+            let svg = `
+                        <svg class="svg-container" width="2000" height="2000">
+                            <path class="svg-path" d="M216,46 h12 a16,16 0 0 1 16,16 v82 a16,16 0 0 0 16,16 h792 a16,16 1 0 0 16,-16 v-82 a16,16 0 0 1 16,-16 h12" />
+                        </svg>
+                        `;
+
+            $('body').prepend(svg);
         },
         generateLines(node, coords, size) {
             let oneLine = coords.width < 160;
@@ -133,6 +141,7 @@ export default {
                     width: 36,
                 });
             }
+            console.log(lines);
             lines.forEach((coord) => {
                 let { x, y, vertical, width } = coord;
                 let _width = vertical ? size : width;
@@ -158,7 +167,7 @@ export default {
             let div2 = `
                         <div class="${
                             node.id
-                        } arrow-item arrow-" style="top:${y -
+                        } arrow-item arrow-point" style="top:${y -
                 (size * 2 + size) / 2}px;left:${x +
                 width -
                 (size * 2 + size) /
@@ -178,7 +187,19 @@ export default {
     background: #333333;
 }
 .arrow-dot {
-    border-radius: 50%;
+    clip-path: circle(40% at 50% 50%);
+}
+.arrow-point {
+    clip-path: polygon(80% 50%, 0 0, 0 100%);
+}
+.svg-path {
+    position: absolute;
+    fill: none;
+    stroke: #333333;
+    stroke-width: 5px;
+}
+.svg-container {
+    position: absolute;
 }
 </style>
 <style scoped>
