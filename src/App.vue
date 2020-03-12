@@ -1,7 +1,7 @@
 <template>
     <div id="app">
         <v-app>
-            <GidLineage></GidLineage>
+            <ProbabilityBucket></ProbabilityBucket>
         </v-app>
     </div>
 </template>
@@ -12,12 +12,13 @@
 // import ParsedIcons from './views/ParsedIcons.vue';
 // import D3Playground from './views/D3Playground.vue';
 // import GidSearch from './views/GidSearch.vue';
-import GidLineage from './views/GidLineage.vue';
+// import GidLineage from './views/GidLineage.vue';
+import ProbabilityBucket from './views/ProbabilityBucket.vue';
 
 export default {
     name: 'app',
     components: {
-        GidLineage,
+        ProbabilityBucket,
     },
     data() {
         return {
