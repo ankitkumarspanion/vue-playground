@@ -1,31 +1,28 @@
 {
   "name": "vue-playground",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
+  "description": "",
+  "author": "",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "parse-icons": "node src/parseIcon.js"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "main": "index.js",
   "dependencies": {
-    "core-js": "^3.3.2",
-    "d3": "^5.14.2",
-    "jquery": "^3.4.1",
-    "vue": "^2.6.10",
-    "vue-perfect-scrollbar": "^0.2.1",
-    "vuedraggable": "^2.23.2",
-    "vuetify": "^2.1.9"
+    "core-js": "^3.6.5",
+    "vue": "^3.0.5"
   },
   "devDependencies": {
-    "@mdi/font": "^4.5.95",
-    "@vue/cli-plugin-babel": "^4.0.0",
-    "@vue/cli-plugin-eslint": "^4.0.0",
-    "@vue/cli-service": "^4.0.0",
-    "babel-eslint": "^10.0.3",
-    "eslint": "^5.16.0",
-    "eslint-plugin-vue": "^5.0.0",
-    "vue-template-compiler": "^2.6.10"
+    "@vue/cli-plugin-babel": "~4.5.0",
+    "@vue/cli-plugin-eslint": "~4.5.0",
+    "@vue/cli-service": "~4.5.0",
+    "@vue/compiler-sfc": "^3.0.0",
+    "babel-eslint": "^10.1.0",
+    "eslint": "^6.7.2",
+    "eslint-plugin-vue": "^7.0.0-0"
   },
   "eslintConfig": {
     "root": true,
@@ -33,21 +30,29 @@
       "node": true
     },
     "extends": [
-      "plugin:vue/essential",
+      "plugin:vue/vue3-essential",
       "eslint:recommended"
     ],
-    "rules": {},
     "parserOptions": {
       "parser": "babel-eslint"
-    }
-  },
-  "postcss": {
-    "plugins": {
-      "autoprefixer": {}
-    }
+    },
+    "rules": {}
   },
   "browserslist": [
     "> 1%",
-    "last 2 versions"
-  ]
+    "last 2 versions",
+    "not dead"
+  ],
+  "_id": "vue-playground@1.0.0",
+  "bugs": {
+    "url": "https://github.com/ankitkumarspanion/vue-playground/issues"
+  },
+  "homepage": "https://github.com/ankitkumarspanion/vue-playground#readme",
+  "keywords": [],
+  "license": "ISC",
+  "readme": "ERROR: No README data found!",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ankitkumarspanion/vue-playground.git"
+  }
 }
